@@ -1,11 +1,9 @@
 """
 main.py — FastAPI server
 Handles: HTTP endpoints, CORS, startup/shutdown
-RAG logic lives in ragbot.py
+LLM logic lives in ragbot.py (Gemini-only mode)
 """
 
-import json
-import re
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
@@ -20,23 +18,24 @@ from ragbot import init_rag, ask
 # =============================================
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("[Kisaan AI] Server starting — initializing RAG pipeline...")
+    print("[Kisaan Konnect AI] Server starting...")
     try:
         init_rag()
-        print("[Kisaan AI] Server is ready and accepting requests.")
+        print("[Kisaan Konnect AI] Server is ready and accepting requests.")
     except Exception as e:
-        print(f"[Kisaan AI] WARNING: Could not initialize RAG pipeline: {e}")
+        print(f"[Kisaan Konnect AI] WARNING: Startup error: {e}")
     yield
-    print("[Kisaan AI] Server shutting down.")
+    print("[Kisaan Konnect AI] Server shutting down.")
+
 
 # =============================================
 # APP
 # =============================================
 app = FastAPI(
-    title="Kisaan Mitra AI (RAG)",
-    description="Offline FastAPI RAG service — FAISS + Flan-T5. No API keys needed.",
-    version="3.0.0",
-    lifespan=lifespan
+    title="Kisaan Konnect AI",
+    description="FastAPI service powered by Gemini for Indian agricultural assistance.",
+    version="5.0.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -47,9 +46,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # =============================================
 # PYDANTIC MODELS
-# Same shape as before — api.js unchanged
 # =============================================
 class ChatMessage(BaseModel):
     role: str
@@ -70,12 +69,13 @@ class ImageAnalysisResponse(BaseModel):
     confidence: str
     treatment: str
 
+
 # =============================================
 # ENDPOINTS
 # =============================================
 @app.get("/")
 def root():
-    return {"status": "ok", "model": "flan-t5-small + FAISS RAG"}
+    return {"status": "ok", "model": "Gemini (gemini-2.0-flash-lite)"}
 
 @app.get("/health")
 def health():
@@ -84,7 +84,6 @@ def health():
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     try:
-        # Extract latest user message
         user_message = ""
         for msg in reversed(request.messages):
             if msg.role == "user":
@@ -99,18 +98,14 @@ async def chat(request: ChatRequest):
 
     except HTTPException:
         raise
-    except RuntimeError as e:
-        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"RAG error: {e}")
+        raise HTTPException(status_code=500, detail=f"Error: {e}")
 
 
 @app.post("/analyze-image", response_model=ImageAnalysisResponse)
 async def analyze_image(request: ImageAnalysisRequest):
-    # Your CNN handles actual image analysis in PlantDiseaseDetection page.
-    # This stub keeps api.js from getting a 404.
     return ImageAnalysisResponse(
         diseasePredicted="Please use the Plant Disease Detection page",
         confidence="N/A",
-        treatment="Image analysis is handled by the CNN model in the Plant Disease Detection section."
+        treatment="Image analysis is handled by the CNN model in the Plant Disease Detection section.",
     )

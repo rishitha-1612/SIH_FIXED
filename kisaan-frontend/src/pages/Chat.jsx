@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
-import { Mic, Send, Bot, MicOff, Loader2, Camera, Globe } from 'lucide-react';
+import { Mic, Send, Bot, MicOff, Loader2, Camera, Globe, Trash2 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function Chat() {
-    const { chats, addChat, addPoints, user, setUser } = useStore();
+    const { chats, addChat, clearChats, addPoints, user, setUser } = useStore();
     const [input, setInput]               = useState('');
     const [isListening, setIsListening]   = useState(false);
     const [isLoading, setIsLoading]       = useState(false);
@@ -24,7 +24,7 @@ export default function Chat() {
     }, [chats, isLoading]);
 
     // =============================================
-    // LANGUAGE CHANGE — fixed to use correct endpoint
+    // LANGUAGE CHANGE
     // =============================================
     const handleLanguageChange = async (e) => {
         const newLang = e.target.value;
@@ -129,7 +129,6 @@ export default function Chat() {
 
         setIsLoading(true);
 
-        // ✅ Fixed: use _id not user_id
         const userId = user?._id || user?.id;
 
         try {
@@ -215,22 +214,36 @@ export default function Chat() {
                     </div>
                 </div>
 
-                <div className="flex items-center bg-gray-50 dark:bg-gray-700 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-600">
-                    <Globe size={14} className="text-gray-500 mr-2" />
-                    <select
-                        value={user?.language || 'English'}
-                        onChange={handleLanguageChange}
-                        className="bg-transparent text-xs font-medium text-gray-700 dark:text-gray-300 outline-none cursor-pointer"
-                    >
-                        <option value="English">English</option>
-                        <option value="Hindi">हिंदी (Hindi)</option>
-                        <option value="Marathi">मराठी (Marathi)</option>
-                        <option value="Telugu">తెలుగు (Telugu)</option>
-                        <option value="Tamil">தமிழ் (Tamil)</option>
-                        <option value="Gujarati">ગુજરાતી (Gujarati)</option>
-                        <option value="Punjabi">ਪੰਜਾਬੀ (Punjabi)</option>
-                        <option value="Kannada">ಕನ್ನಡ (Kannada)</option>
-                    </select>
+                <div className="flex items-center gap-2">
+                    {/* Clear Chat Button */}
+                    {chats.length > 0 && (
+                        <button
+                            onClick={clearChats}
+                            className="p-2 rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                            title="Clear chat"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    )}
+
+                    {/* Language Selector */}
+                    <div className="flex items-center bg-gray-50 dark:bg-gray-700 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-600">
+                        <Globe size={14} className="text-gray-500 mr-2" />
+                        <select
+                            value={user?.language || 'English'}
+                            onChange={handleLanguageChange}
+                            className="bg-transparent text-xs font-medium text-gray-700 dark:text-gray-300 outline-none cursor-pointer"
+                        >
+                            <option value="English">English</option>
+                            <option value="Hindi">हिंदी (Hindi)</option>
+                            <option value="Marathi">मराठी (Marathi)</option>
+                            <option value="Telugu">తెలుగు (Telugu)</option>
+                            <option value="Tamil">தமிழ் (Tamil)</option>
+                            <option value="Gujarati">ગુજરાતી (Gujarati)</option>
+                            <option value="Punjabi">ਪੰਜਾਬੀ (Punjabi)</option>
+                            <option value="Kannada">ಕನ್ನಡ (Kannada)</option>
+                        </select>
+                    </div>
                 </div>
             </header>
 

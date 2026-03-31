@@ -32,6 +32,7 @@ export const useStore = create(
 
             chats: [],
             addChat: (chat) => set((state) => ({ chats: [...state.chats, chat] })),
+            clearChats: () => set({ chats: [] }),
 
             scans: [],
             addScan: (scan) => set((state) => ({ scans: [...state.scans, scan] })),
@@ -44,8 +45,8 @@ export const useStore = create(
             clearAdvisoryResult: () => set({ advisoryResult: null }),
         }),
         {
-            name: 'kisaan-storage', // unique name
-            storage: createJSONStorage(() => idbStorage), // use localforage
+            name: 'kisaan-storage',
+            storage: createJSONStorage(() => idbStorage),
         }
     )
 )
